@@ -21,8 +21,6 @@ BASE       ArcherLab
 PLAYSTYLE  Build small · Ship fast · Keep improving
 ```
 
-브라우저에서 바로 플레이할 수 있는 게임과 도구를 혼자 만들고 운영합니다. 기획부터 코드, 디자인, 배포까지 직접 다루며 아이디어를 실제 서비스로 완성합니다.
-
 ## `> QUEST_LOG`
 
 | BUILD | TYPE | PLAY |
