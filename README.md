@@ -34,7 +34,7 @@ PLAYSTYLE  Build small · Ship fast · Keep improving
 | **Blockpang** | Block puzzle game | [OPEN](https://game.archerlab.dev/blockpang/) |
 | **Shadow Survival** | Snake-like game | [OPEN](https://game.archerlab.dev/solo-leveling/) |
 | **Cat Tower** | Stacking tower game | [OPEN](https://game.archerlab.dev/cat-tower/) |
-| **Harem Mate** | AI character chat | [OPEN](https://harem.archerlab.dev/) |
+| **Harem Mate** | Character companion chat | [OPEN](https://harem.archerlab.dev/) |
 
 ## `> LOADOUT`
 
