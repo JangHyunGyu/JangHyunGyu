@@ -25,8 +25,8 @@ PLAYSTYLE  Build small · Ship fast · Keep improving
 
 | BUILD | TYPE | PLAY |
 | :--- | :--- | :---: |
-| **Cupid** | School romance visual novel | [OPEN](https://cupid.archerlab.dev/) |
-| **Nevergrad** | Classroom story visual novel | [OPEN](https://nevergrad.archerlab.dev/) |
+| **Cupid** | Romance visual novel | [OPEN](https://cupid.archerlab.dev/) |
+| **Nevergrad** | Romance visual novel | [OPEN](https://nevergrad.archerlab.dev/) |
 | **School Zombie Defense** | Defense game | [OPEN](https://game.archerlab.dev/school-zombie-defense/) |
 | **Jelly Pang!** | Merge puzzle game | [OPEN](https://game.archerlab.dev/jelly-pang-2048/) |
 | **Parking Escape** | Sliding car puzzle | [OPEN](https://game.archerlab.dev/parking-escape/) |
