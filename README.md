@@ -32,7 +32,7 @@ PLAYSTYLE  Build small · Ship fast · Keep improving
 | **Parking Escape** | Sliding car puzzle | [OPEN](https://game.archerlab.dev/parking-escape/) |
 | **Jewelria** | Match-3 puzzle | [OPEN](https://game.archerlab.dev/jewelria/) |
 | **Blockpang** | Block puzzle game | [OPEN](https://game.archerlab.dev/blockpang/) |
-| **Shadow Survival** | Survival action game | [OPEN](https://game.archerlab.dev/solo-leveling/) |
+| **Shadow Survival** | Snake-like game | [OPEN](https://game.archerlab.dev/solo-leveling/) |
 | **Cat Tower** | Stacking tower game | [OPEN](https://game.archerlab.dev/cat-tower/) |
 | **Harem Mate** | AI character chat | [OPEN](https://harem.archerlab.dev/) |
 
