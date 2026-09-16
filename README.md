@@ -25,11 +25,10 @@ PLAYSTYLE  Build small · Ship fast · Keep improving
 
 | BUILD | TYPE | PLAY |
 | :--- | :--- | :---: |
-| **LUMEN SHIFT** | Luminous block puzzle | [OPEN](https://game.archerlab.dev/lumen-shift/) |
 | **Cupid** | Romance visual novel | [OPEN](https://cupid.archerlab.dev/) |
 | **School Zombie Defense** | Browser defense game | [OPEN](https://game.archerlab.dev/school-zombie-defense/) |
 | **Jelly Pang!** | Merge puzzle game | [OPEN](https://game.archerlab.dev/jelly-pang-2048/) |
-| **Golf Swing Master** | AI swing analysis | [OPEN](https://golf.archerlab.dev/) |
+| **Harem Mate** | Browser AI character chat | [OPEN](https://harem.archerlab.dev/) |
 
 ## `> LOADOUT`
 
