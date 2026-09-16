@@ -29,6 +29,11 @@ PLAYSTYLE  Build small · Ship fast · Keep improving
 | **Nevergrad** | Romance visual novel | [OPEN](https://nevergrad.archerlab.dev/) |
 | **School Zombie Defense** | Browser defense game | [OPEN](https://game.archerlab.dev/school-zombie-defense/) |
 | **Jelly Pang!** | Merge puzzle game | [OPEN](https://game.archerlab.dev/jelly-pang-2048/) |
+| **Parking Escape** | Sliding car puzzle | [OPEN](https://game.archerlab.dev/parking-escape/) |
+| **Jewelria** | Match-3 puzzle | [OPEN](https://game.archerlab.dev/jewelria/) |
+| **Blockpang** | Block puzzle game | [OPEN](https://game.archerlab.dev/blockpang/) |
+| **Shadow Survival** | Survival action game | [OPEN](https://game.archerlab.dev/solo-leveling/) |
+| **Cat Tower** | Stacking tower game | [OPEN](https://game.archerlab.dev/cat-tower/) |
 | **Harem Mate** | Browser AI character chat | [OPEN](https://harem.archerlab.dev/) |
 
 ## `> LOADOUT`
