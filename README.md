@@ -2,20 +2,20 @@
 
 <p align="center">
   <a href="https://archerlab.dev">
-    <img src="./assets/archerlab-player-card.svg" width="100%" alt="ArcherLab — Jang Hyun Gyu, solo game developer" />
+    <img src="./assets/archerlab-player-card.svg" width="100%" alt="ArcherLab — archerlab, solo game developer" />
   </a>
 </p>
 
 <div align="center">
 
-[**ENTER ARCHERLAB**](https://archerlab.dev) &nbsp;·&nbsp; [**PLAY GAMES**](https://game.archerlab.dev) &nbsp;·&nbsp; [**CONTACT**](mailto:hyungyu@archerlab.dev)
+[**ENTER ARCHERLAB**](https://archerlab.dev) &nbsp;·&nbsp; [**PLAY GAMES**](https://game.archerlab.dev) &nbsp;·&nbsp; [**CONTACT**](mailto:archerlab@archerlab.dev)
 
 </div>
 
 ## `> PLAYER_PROFILE`
 
 ```text
-NAME       Jang Hyun Gyu
+NAME       archerlab
 CLASS      Solo Game Developer / Web Builder
 BASE       ArcherLab
 PLAYSTYLE  Build small · Ship fast · Keep improving

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
   <title id="title">ArcherLab player card</title>
-  <desc id="desc">A dark pixel game interface introducing Jang Hyun Gyu as a solo game developer.</desc>
+  <desc id="desc">A dark pixel game interface introducing archerlab as a solo game developer.</desc>
 
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -74,7 +74,7 @@
 
     <g font-family="Consolas, Menlo, Monaco, monospace">
       <text x="72" y="202" fill="#64748b" font-size="15" letter-spacing="4">PLAYER ONE // ARCHERLAB</text>
-      <text x="68" y="270" fill="#f8fafc" font-size="62" font-weight="800" letter-spacing="3">JANG HYUN GYU</text>
+      <text x="68" y="270" fill="#f8fafc" font-size="62" font-weight="800" letter-spacing="3">ARCHERLAB</text>
       <rect x="72" y="296" width="492" height="2" fill="url(#accent)"/>
       <text x="72" y="334" fill="#c4b5fd" font-size="18" letter-spacing="2">SOLO GAME DEV  ·  WEB BUILDER</text>
       <text x="72" y="374" fill="#64748b" font-size="13" letter-spacing="2">LOGIC × DESIGN, IN PRACTICE.</text>
