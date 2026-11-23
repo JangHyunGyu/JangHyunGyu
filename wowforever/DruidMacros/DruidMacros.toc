@@ -1,0 +1,7 @@
+## Interface: 16001
+## Title: DruidMacros (드루이드 매크로)
+## Notes: 드루이드 한글 매크로 12개를 만들고 단축바 1~=에 자동 배치합니다. /dmacro 도움말
+## Author: GrokBot
+## Version: 5.4
+## SavedVariablesPerCharacter: DruidMacrosDB
+DruidMacros.lua
