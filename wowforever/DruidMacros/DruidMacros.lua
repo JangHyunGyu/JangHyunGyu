@@ -1,6 +1,16 @@
--- DruidMacros 5.1: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
+-- DruidMacros 5.5: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
 local TAG = "|cffff7d0a[드루이드 매크로]|r "
 local function P(msg) print(TAG .. msg) end
+
+-- 5.5: 새 PC 첫 접속 직후에는 GetCurrentBindingSet()이 1·2가 아닌 값을 돌려줘 SaveBindings가 오류를 냈다
+-- ("Usage: SaveBindings(1|2)"). 값이 정상일 때만 저장하고, 아니면 잠시 뒤 다시 시도한다(최대 5번).
+local function SaveB(try)
+  if not (SaveBindings and GetCurrentBindingSet) then return end
+  local s = GetCurrentBindingSet()
+  if s == 1 or s == 2 then pcall(SaveBindings, s); return end
+  try = (try or 0) + 1
+  if try <= 5 and C_Timer and C_Timer.After then C_Timer.After(5, function() SaveB(try) end) end
+end
 
 -- 주문 ID로 클라이언트 언어의 이름을 가져온다(한글 클라면 한글 이름).
 local function N(id, fallback)
@@ -59,6 +69,7 @@ local function BuildList()
   local FB = FormIndex({5487, 9634}, "1")
   local FC = FormIndex({768}, "3")
   local FA = FormIndex({1066}, "2") -- 바다표범
+  local FT = Known(783) and FormIndex({783}, nil) or nil -- 5.5: 치타(30렙). 배웠을 때만 실제 폼 번호를 쓴다
   local function F(t) return (t:gsub("form:1/3", "form:"..FB.."/"..FC):gsub("form:1", "form:"..FB):gsub("form:3", "form:"..FC)) end
   local claw, rake, bite, rip = K(1082,"할퀴기"), K(1822,"갈퀴 발톱"), (K(1328618,"흉포한 이빨") or K(22568,"흉포한 이빨")), K(1079,"도려내기")
   local shred, ravage, pounce = K(5221,"칼날 발톱"), K(6785,"찢어발기기"), K(9005,"암습")
@@ -98,7 +109,7 @@ local function BuildList()
     {"DM= 부활", T.."/cast [combat,@mouseover,help,dead][combat] "..(rebirth or "환생").."; [@mouseover,help,dead][] 되살리기"},
     {"DME 곰", T..(bear and "/cancelform [form:1,nomod:shift]\n" or "")..CAST{{"[mod:shift,form:1] ",nil,true},{"",BANG(bear)}}, {"E","SHIFT-E"}}, -- 4.8: 곰에서 E = 폼 풀고 바로 다시 곰
     -- 여러 번 눌러도 폼이 안 풀린다(! 붙임). 해제는 F1. 숨기는 마우스 휠 클릭(4.1). Q 하나로: 물속 바다표범 / 밖에서 전투 아닐 때 치타(30렙) / 나머지 표범. Shift+Q는 무조건 표범
-    {"DMQ 표범", T..(cat and ("/cancelform [form:3"..(aquatic and ("/"..FA) or "")..",nomod:shift]\n") or "")..CAST{{"[mod:shift,form:3] ",nil,true},{"[mod:shift] ",BANG(cat)},{"[swimming] ",BANG(aquatic)},{"[nocombat,outdoors] ",BANG(travel)},{"",BANG(cat)}}, {"Q","SHIFT-Q"}}, -- 4.7/4.8: 표범·바다표범에서 Q = 폼 풀고 바로 다시 표범(이동 불가·감속 풀기). Shift+Q는 표범이면 그대로
+    {"DMQ 표범", T..(cat and ("/cancelform [form:3"..(aquatic and ("/"..FA) or "")..(FT and ("/"..FT) or "")..",nomod:shift]\n") or "")..CAST{{"[mod:shift,form:3] ",nil,true},{"[mod:shift] ",BANG(cat)},{"[swimming] ",BANG(aquatic)},{"[nocombat,outdoors] ",BANG(travel)},{"",BANG(cat)}}, {"Q","SHIFT-Q"}}, -- 4.7/4.8: 표범·바다표범에서 Q = 폼 풀고 바로 다시 표범(이동 불가·감속 풀기). Shift+Q는 표범이면 그대로
     {"DMR 강타", "#showtooltip\n/startattack [form:1]\n"..CAST{{"[mod:shift,form:1/3] ",grasp},{"[form:1] ",bash},{"[form:3] ",elune},{"[mod:shift] ",elune},{"",grasp}}, {"R","SHIFT-R"}}, -- 5.0: R 곰 강타/표범 엘룬의 빛/사람 자연의 손아귀, Shift+R 곰·표범 자연의 손아귀/사람 엘룬의 빛
     {"DMF 생존기", T..CAST{{"[form:1,mod:shift] ",frenzy},{"[form:1] ",enrage},{"[form:3] ",dash},{"",bark}}, {"F","SHIFT-F"}},
     {"DM 변신해제", T.."/cancelform", {"F1"}},
@@ -206,7 +217,7 @@ local function PlaceAll()
     local cur = GetBindingAction(key)
     if not GetBindingKey(cmd) and (cur == nil or cur == "") then SetBinding(key, cmd); changed = true end
   end
-  if changed and SaveBindings and GetCurrentBindingSet then SaveBindings(GetCurrentBindingSet()) end
+  if changed then SaveB() end
 end
 
 -- 꾹 누르기(연속 시전)는 매크로에선 안 되므로, 연타 스킬은 폼별 단축바에 주문을 직접 올린다.
@@ -286,7 +297,7 @@ local function BindKeys(force)
   -- 4.3: 지도는 ` 키(사용자 요청). M도 그대로 둔다
   if GetBindingAction("`") ~= "TOGGLEWORLDMAP" then
     SetBinding("`", "TOGGLEWORLDMAP")
-    if SaveBindings and GetCurrentBindingSet then SaveBindings(GetCurrentBindingSet()) end
+    SaveB()
   end
   -- 5.0: Shift+숫자는 와우 기본이 '단축바 페이지 넘기기'라서 Shift+3(도려내기) 등을 누르면 바가 3페이지로 넘어가 폼 바가 안 바뀌었다.
   -- Shift+숫자를 같은 칸 버튼에 묶어 매크로의 [mod:shift]가 나가게 하고, 페이지가 넘어가 있으면 1페이지로 되돌린다
@@ -295,13 +306,13 @@ local function BindKeys(force)
     local cmd = "ACTIONBUTTON"..i
     if GetBindingAction("SHIFT-"..key) ~= cmd then SetBinding("SHIFT-"..key, cmd); sc = true end
   end
-  if sc and SaveBindings and GetCurrentBindingSet then SaveBindings(GetCurrentBindingSet()) end
+  if sc then SaveB() end
   if GetActionBarPage and ChangeActionBarPage and GetActionBarPage() ~= 1 then ChangeActionBarPage(1) end
   if DruidMacrosDB.bindv == BINDV and not force then return end
   for _, m in ipairs(BuildList()) do
     if m[3] then for _, key in ipairs(m[3]) do SetBindingMacro(key, m[1]) end end
   end
-  if SaveBindings and GetCurrentBindingSet then SaveBindings(GetCurrentBindingSet()) end
+  SaveB()
   local first = DruidMacrosDB.bindv ~= BINDV
   DruidMacrosDB.bindv = BINDV
   if first then
@@ -524,6 +535,8 @@ f:SetScript("OnEvent", function(self, ev)
       DumpSpells()
       -- 키를 꾹 누르고 있으면 계속 시전
       pcall(function() if C_CVar and C_CVar.SetCVar then C_CVar.SetCVar("ActionButtonUseKeyHeldSpell", "1") elseif SetCVar then SetCVar("ActionButtonUseKeyHeldSpell", "1") end end)
+      -- 5.5: Lua 오류 팝업 끄기(사용자 요청). 다른 애드온의 일회성 오류가 화면을 가리지 않게 한다. 다시 보려면 /console scriptErrors 1
+      pcall(function() if C_CVar and C_CVar.SetCVar then C_CVar.SetCVar("scriptErrors", "0") elseif SetCVar then SetCVar("scriptErrors", "0") end end)
       Run(DruidMacrosDB.placed and "refresh" or "setup")
     end)
   elseif ev == "PLAYER_REGEN_ENABLED" then
@@ -595,7 +608,7 @@ hbf:SetScript("OnEvent", function()
     if a == "CLICK DMHerbToggleButton:LeftButton" then return end
     if a == nil or a == "" then
       SetBindingClick(key, "DMHerbToggleButton")
-      SaveBindings(GetCurrentBindingSet())
+      SaveB()
       print("|cff33ff99[약초지도]|r " .. key .. " 키로 약초 표시를 켜고 끌 수 있어요. (/약초 도 돼요)")
       return
     end
