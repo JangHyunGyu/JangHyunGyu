@@ -13,6 +13,9 @@ $UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 S
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $cr = [string][char]13; $lf = [string][char]10; $tab = [string][char]9
 function Say($m) { Write-Host ('[setup] ' + $m) }
+# Leveling guide: Polestar (written for Forever, 1-60). Set $useTugs = $true to install Guidelime + TUGs
+# with the solo patch instead of removing them (TUGs is Forever-specific only up to about level 35).
+$useTugs = $false
 
 # ---- 1. find the game ----
 $wow = $null
@@ -41,7 +44,7 @@ function Get-File($url, $out, $referer) {
   if ($LASTEXITCODE -ne 0 -or -not (Test-Path $out)) { throw ('download failed: ' + $url) }
 }
 function Get-GitHub($repo, $pattern) {
-  $rels = Invoke-RestMethod ('https://api.github.com/repos/' + $repo + '/releases?per_page=8') -Headers @{ 'User-Agent' = 'curl' }
+  $rels = Invoke-RestMethod ('https://api.github.com/repos/' + $repo + '/releases?per_page=20') -Headers @{ 'User-Agent' = 'curl' }
   foreach ($r in $rels) {
     if ($r.prerelease) { continue }
     $as = $r.assets | Where-Object { $_.name -like $pattern } | Select-Object -First 1
@@ -68,19 +71,21 @@ function Get-Curse($id, $label) {
 # ---- 2. download the latest of everything ----
 $zipList = @()
 $zipList += Get-GitHub 'Questie/Questie' 'Questie-*.zip'
-$zipList += Get-GitHub 'max-ri/Guidelime' 'Guidelime-*.zip'
+$zipList += Get-GitHub 'fitzforge/polestar' 'Polestar-*.zip'
+if ($useTugs) { $zipList += Get-GitHub 'max-ri/Guidelime' 'Guidelime-*.zip' }
 $zipList += Get-GitHub 'cjber/shortest-path-forever' '*forever.zip'
 $zipList += Get-GitHub 'Nevcairiel/GatherMate2' 'GatherMate2-*.zip'
 $zipList += Get-GitHub 'Nevcairiel/GatherMate2_Data' 'GatherMate2_Data-*.zip'
 $zipList += Get-Curse 1707376 'GodJohnson'
-$zipList += Get-Curse 335816 'GuideLime_TUGs_Forever'
+if ($useTugs) { $zipList += Get-Curse 335816 'GuideLime_TUGs_Forever' }
 $zipList += Get-Curse 261459 'FasterLoot'
 $zipList += Get-Curse 1710286 'LayerSwap'
 $zipList += Get-Curse 1716822 'ForeverLayerHop'
 $zipList += Get-Curse 1724751 'ForeverVisibility'
 
 # ---- 3. extract and copy (never QuestieTrace, retail GatherMate2 storage, movement speed addons) ----
-$skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*)$'
+$skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*|Polestar_(deDE|esES|esMX|frFR|ptBR|ruRU|zhCN|zhTW))$'
+if (-not $useTugs) { $skip = $skip.Replace('^(', '^(Guidelime|GuideLime_TUGs_Forever|') }
 foreach ($zip in $zipList) {
   $dir = Join-Path $ext ([IO.Path]::GetFileNameWithoutExtension($zip))
   if (Test-Path $dir) { Remove-Item $dir -Recurse -Force -Confirm:$false }
@@ -117,7 +122,7 @@ try {
 
 # ---- 5. Guidelime koKR font patch ----
 $mw = Join-Path $ao 'Guidelime\MainWindow.lua'
-$txt = [IO.File]::ReadAllText($mw, $utf8)
+$txt = 'koKR font fix'; if (Test-Path $mw) { $txt = [IO.File]::ReadAllText($mw, $utf8) }
 if ($txt -notmatch 'koKR font fix') {
   $nl = $lf; if ($txt.Contains($cr + $lf)) { $nl = $cr + $lf }
   $anchor = 'function MW.getFontPath()' + $nl
