@@ -1,9 +1,15 @@
 # WoW Forever addon + macro setup for a new PC (JangHyunGyu/wowforever)
 # Run in PowerShell:
 #   irm https://raw.githubusercontent.com/JangHyunGyu/JangHyunGyu/main/wowforever/setup.ps1 | iex
-# Installs the latest version of every addon in the work log, applies the patches,
-# installs DruidMacros from this repo and rebuilds the TUGs solo guides (no dungeon / elite quests).
-# Run it again after the game has been started and closed once to apply the SavedVariables settings.
+# Installs the latest version of every addon in the work log (including macros and keybinds
+# shipped in this repo's DruidMacros), applies the patches, and rebuilds the TUGs solo
+# guides only if $useTugs is set. Macros and WASD-near keybinds are created in-game by
+# DruidMacros (BINDV) after login; this script does not edit bindings-cache or WTF while
+# the game is running. Run it again after the game has been started and closed once to
+# apply the SavedVariables settings (GodJohnson arrow).
+# 2026-11-28 set also includes DruidResources, Baganator+Syndicator, DenoNameplate, TheForeverEra.
+# Do not install MovementSpeed/WidgetTools, ElvUI/Bartender4/Dominos (bar conflict), or
+# ComboPointsForever/ForeverComboBar (duplicates DruidResources).
 & {
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -82,6 +88,11 @@ $zipList += Get-Curse 261459 'FasterLoot'
 $zipList += Get-Curse 1710286 'LayerSwap'
 $zipList += Get-Curse 1716822 'ForeverLayerHop'
 $zipList += Get-Curse 1724751 'ForeverVisibility'
+$zipList += Get-Curse 1720699 'DruidResources'
+$zipList += Get-Curse 914482 'Baganator'
+$zipList += Get-Curse 988370 'Syndicator'
+$zipList += Get-Curse 1728681 'DenoNameplate'
+$zipList += Get-Curse 1806843 'TheForeverEra'
 
 # ---- 3. extract and copy (never QuestieTrace, retail GatherMate2 storage, movement speed addons) ----
 $skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*|Polestar_(deDE|esES|esMX|frFR|ptBR|ruRU|zhCN|zhTW))$'
@@ -151,12 +162,17 @@ foreach ($file in (Get-ChildItem (Join-Path $ao 'ForeverLayerHop') -Filter *.lua
   if ($added -gt 0) { [IO.File]::WriteAllLines($file.FullName, $res, $utf8); Say ('ForeverLayerHop patched: ' + $file.Name + ' x' + $added) }
 }
 
-# ---- 7. DruidMacros (this repo) ----
+# ---- 7. DruidMacros (this repo: macros + keybinds; never an older pinned zip) ----
 $dm = Join-Path $ao 'DruidMacros'
 New-Item -ItemType Directory -Force $dm | Out-Null
 foreach ($n in 'DruidMacros.lua', 'DruidMacros.toc') { Get-File ($RAW + '/DruidMacros/' + $n) (Join-Path $dm $n) $null }
 $ver = (Select-String -Path (Join-Path $dm 'DruidMacros.toc') -Pattern '^## Version:\s*(.+)$' | Select-Object -First 1).Matches[0].Groups[1].Value
-Say ('DruidMacros ' + $ver)
+$luaMd5 = (Get-FileHash (Join-Path $dm 'DruidMacros.lua') -Algorithm MD5).Hash.ToLower()
+$tocMd5 = (Get-FileHash (Join-Path $dm 'DruidMacros.toc') -Algorithm MD5).Hash.ToLower()
+Say ('DruidMacros ' + $ver + '  lua=' + $luaMd5 + '  toc=' + $tocMd5)
+$need = [version]'5.11'
+$got = $null; [void][version]::TryParse($ver, [ref]$got)
+if (-not $got -or $got -lt $need) { throw ('DruidMacros in this repo is ' + $ver + ', need 5.11 or newer') }
 
 # ---- 8. TUGs solo guides: drop dungeon / instance quests everywhere, elite quests in guides from level 20,
 #         quests that need a removed quest first, and the dungeon-only instruction lines ----

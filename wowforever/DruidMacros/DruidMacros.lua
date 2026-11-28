@@ -1,4 +1,4 @@
--- DruidMacros 5.5: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
+-- DruidMacros 5.11: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
 local TAG = "|cffff7d0a[드루이드 매크로]|r "
 local function P(msg) print(TAG .. msg) end
 
@@ -77,6 +77,7 @@ local function BuildList()
   local bash, enrage, frenzy = K(5211,"강타"), K(5229,"분노"), K(22842,"광포한 재생력")
   -- 포에버 야성의 돌진 특성(1238122). 표범 폼에서는 등 뒤로 도약하는 표범판(414924)으로 바뀐다
   local charge = K(414924,"야성의 돌진") or K(1238122,"야성의 돌진") or K(16979,"야성의 돌진")
+  local bearcharge = K(1238122,"야성의 돌진") or K(16979,"야성의 돌진") -- 5.6: 곰판(이동 불가+시전 방해, 15초)
   -- 5.0: 포에버는 호랑이의 분노 삭제(대신 40레벨 특성 '변신의 힘'). 나이트엘프 종족 기술 엘룬의 빛(치명타 +10%, 15초, 3분)을 대신 쓴다
   local cower, dash, prowl = K(8998,"웅크리기"), K(1850,"질주"), K(5215,"숨기")
   local elune = K(1259799,"엘룬의 빛")
@@ -91,42 +92,47 @@ local function BuildList()
   local rebirth = K(20484,"환생")
   local MO = "[@mouseover,help,nodead][help,nodead][@player] "
   local MOS = "[mod:shift,@mouseover,help,nodead][mod:shift,help,nodead][mod:shift,@player] "
-  local MH = "[@mouseover,harm,nodead][] "
+  local MOC = "[mod:ctrl,@mouseover,help,nodead][mod:ctrl,help,nodead][mod:ctrl,@player] "
   local T, SA = "#showtooltip\n", "#showtooltip\n/startattack\n"
+  -- 5.8: 매크로 24개 → 15개. 1·2·4·5(공격/출혈/요정불꽃/포효)는 폼별 단축바에 주문을 바로 올리므로 매크로가 필요 없었다.
   local list = {
-    -- 1~12: 단축바 1,2,...,9,0,-,=   13~: 키 직접 연결
-    {"DM1 공격", SA..CAST{{"[form:1] ",maul},{"[form:3,stealth,mod:shift] ",ravage},{"[form:3,stealth] ",pounce},{"[form:3,mod:shift] ",shred},{"[form:3] ",claw},{"",wrath}}},
-    {"DM2 출혈", SA..CAST{{"[form:1] ",swipe},{"[form:3] ",rake},{MH,moonfire}}},
-    {"DM3 마무리", SA..CAST{{"[form:1] ",demo},{"[form:3,mod:shift] ",rip},{"[form:3] ",bite or rip},{MH,roots}}},
-    {"DM4 요정불꽃", T..CAST{{"[form:1/3] ",fff or ff},{MH,ff}}}, -- 포에버: 일반 요정의 불꽃이 표범·곰에서도 써짐(야성 특성 삭제)
-    {"DM5 포효", T..CAST{{"[form:1] ",growl},{"[form:3] ",cower},{MH,hib}}},
-    {"DM6 회복", T..CAST{{MOS,ht},{MO,rejuv}}},
-    {"DM7 재생", T..CAST{{MO,regrowth}}},
-    {"DM8 생존", T..CAST{{"[mod:shift,@mouseover,help,nodead][mod:shift] ",innerv},{"",bark}}},
-    {"DM9 숨기질주", T..CAST{{"[noform:3] ",BANG(cat)},{"[combat] ",dash},{"[nostealth] ",prowl}}},
-    {"DM0 버프", T..CAST{{MOS,thorns},{"[help,nodead][@player] ",motw}}},
-    {"DM- 해제", T..CAST{{MOS,poison},{MO,curse}}},
-    {"DM= 부활", T.."/cast [combat,@mouseover,help,dead][combat] "..(rebirth or "환생").."; [@mouseover,help,dead][] 되살리기"},
-    {"DME 곰", T..(bear and "/cancelform [form:1,nomod:shift]\n" or "")..CAST{{"[mod:shift,form:1] ",nil,true},{"",BANG(bear)}}, {"E","SHIFT-E"}}, -- 4.8: 곰에서 E = 폼 풀고 바로 다시 곰
-    -- 여러 번 눌러도 폼이 안 풀린다(! 붙임). 해제는 F1. 숨기는 마우스 휠 클릭(4.1). Q 하나로: 물속 바다표범 / 밖에서 전투 아닐 때 치타(30렙) / 나머지 표범. Shift+Q는 무조건 표범
-    {"DMQ 표범", T..(cat and ("/cancelform [form:3"..(aquatic and ("/"..FA) or "")..(FT and ("/"..FT) or "")..",nomod:shift]\n") or "")..CAST{{"[mod:shift,form:3] ",nil,true},{"[mod:shift] ",BANG(cat)},{"[swimming] ",BANG(aquatic)},{"[nocombat,outdoors] ",BANG(travel)},{"",BANG(cat)}}, {"Q","SHIFT-Q"}}, -- 4.7/4.8: 표범·바다표범에서 Q = 폼 풀고 바로 다시 표범(이동 불가·감속 풀기). Shift+Q는 표범이면 그대로
-    {"DMR 강타", "#showtooltip\n/startattack [form:1]\n"..CAST{{"[mod:shift,form:1/3] ",grasp},{"[form:1] ",bash},{"[form:3] ",elune},{"[mod:shift] ",elune},{"",grasp}}, {"R","SHIFT-R"}}, -- 5.0: R 곰 강타/표범 엘룬의 빛/사람 자연의 손아귀, Shift+R 곰·표범 자연의 손아귀/사람 엘룬의 빛
-    {"DMF 생존기", T..CAST{{"[form:1,mod:shift] ",frenzy},{"[form:1] ",enrage},{"[form:3] ",dash},{"",bark}}, {"F","SHIFT-F"}},
+    -- 치유 한 키(T): 기본 회복, Shift 재생, Ctrl 치유의 손길 (마우스오버 대상 → 대상 → 자신)
+    {"DM 치유", T..CAST{{MOS,regrowth},{MOC,ht},{MO,rejuv}}},
+    {"DM 버프", T..CAST{{"[mod:ctrl,mod:shift,@mouseover,help,nodead][mod:ctrl,mod:shift,help,nodead][mod:ctrl,mod:shift,@player] ",thorns},{"[help,nodead][@player] ",motw}}}, -- Ctrl+Z 야생의 징표, Ctrl+Shift+Z 가시(바 클릭도 징표)
+    {"DM 해제", T..CAST{{MOS,poison},{MO,curse}}},                          -- X: 저주 해제, Shift 독 해제
+    {"DM 부활", T.."/cast [combat,@mouseover,help,dead][combat] "..(rebirth or "환생").."; [@mouseover,help,dead][] 되살리기"}, -- V
+    -- E: 곰. 이미 곰이면 풀고 바로 다시 곰(이동 불가·감속 풀기)
+    {"DME 곰", T..(bear and "/cancelform [form:1,nomod:shift]\n" or "")..CAST{{"[mod:shift,form:1] ",nil,true},{"",BANG(bear)}}, {"E","SHIFT-E"}},
+    -- 5.11 Q: 항상 표범(물속도 표범). 이미 표범·바다표범·치타면 풀고 바로 다시 표범. Shift+Q = 수영 중 바다표범, 아니면 치타(여행)
+    {"DMQ 표범", T..(cat and ("/cancelform [form:3"..(aquatic and ("/"..FA) or "")..(FT and ("/"..FT) or "")..",nomod:shift]\n") or "")
+      ..(((aquatic or travel) and ("/cancelform [form:"..((aquatic and travel and (FA.."/"..FT)) or FA or FT)..",mod:shift]\n") or ""))
+      ..CAST{{"[mod:shift,swimming] ",BANG(aquatic)},{"[mod:shift] ",BANG(travel),not travel},{"",BANG(cat)}}, {"Q","SHIFT-Q"}},
+    {"DMR 강타", "#showtooltip\n/startattack [form:1]\n"..CAST{{"[mod:shift,form:1/3] ",grasp},{"[form:1] ",bash},{"[form:3] ",elune},{"[mod:shift] ",elune},{"",grasp}}, {"R","SHIFT-R"}}, -- R 곰 강타/표범 엘룬의 빛/사람 자연의 손아귀, Shift+R 반대
+    {"DMF 생존기", T..CAST{{"[form:1,mod:shift] ",frenzy},{"[mod:shift] ",innerv},{"[form:1] ",enrage},{"[form:3] ",dash},{"",bark}}, {"F","SHIFT-F"}}, -- F 곰 분노/표범 질주/사람 나무껍질, Shift+F 곰 광포한 재생력/그 외 정신 자극
     {"DM 변신해제", T.."/cancelform", {"F1"}},
-    -- 4.1: 숨기 = 마우스 가운데(휠) 클릭. 사람·곰이면 표범으로 변신, 표범이면 숨기. 숨은 상태에서 눌러도 안 풀림
-    {"DM 숨기", T..CAST{{"[noform:3] ",BANG(cat)},{"",prowl}}, {"BUTTON3"}}, -- 4.9: 은신 중 한 번 더 누르면 은신 해제
+    {"DM 숨기", T..CAST{{"[noform:3] ",BANG(cat)},{"",prowl}}, {"BUTTON3"}}, -- 휠 클릭: 사람·곰이면 표범, 표범이면 숨기, 은신 중 한 번 더 누르면 은신 해제
     {"DM 섬광곰", (ff and moonfire and bear) and (T.."/cancelform [form:1]\n/castsequence reset=target/combat "..ff..", "..moonfire..", "..bear) or ""},
     {"DM 위상", "/ls swap"},
-    -- 4.2: 돌진+칼날발톱. 1번 누르면 등 뒤로 돌진, 바로 한 번 더 누르면 칼날 발톱(돌진 쿨이면 바로 칼날 발톱). 4.4부터 표범·숨기 바 5번(도려내기는 3번 Shift)
-    {"DM 돌진발톱", (shred or claw) and (SA..(charge and ("/cast [form:3,harm,nodead] "..charge.."\n") or "")..CAST{{"[form:3] ",shred or claw}}) or ""},
-    {"DM 표범마무리", (bite or rip) and (SA..CAST{{"[mod:shift] ",rip},{"",bite or rip}}) or ""},
+    -- 5번 한 칸 합침(표범·은신·곰): 표범은 등 뒤 돌진 → 한 번 더 누르면 칼날 발톱(없으면 할퀴기), 곰은 포효·Shift 야성의 돌진(특성)
+    {"DM 돌진", (function()
+      local b = SA
+      local any = false
+      if (shred or claw) then
+        if charge then b = b.."/cast [form:3,harm,nodead] "..charge.."\n" end
+        b = b.."/cast [form:3] "..(shred or claw).."\n"; any = true
+      end
+      local g = CAST{{"[form:1,mod:shift,harm,nodead] ",bearcharge},{"[form:1] ",growl}}
+      if g ~= "" then b = b..g.."\n"; any = true end
+      return any and b or ""
+    end)()},
+{"DM 표범마무리", (bite or rip) and (SA..CAST{{"[mod:shift] ",rip},{"",bite or rip}}) or ""}, -- 표범 3: 흉포한 이빨, Shift 도려내기
   }
   for _, m in ipairs(list) do m[2] = F(m[2]) end
   return list
 end
 
 -- 배운 주문 목록을 저장(매크로 맞춤용)
-local CHECK = {1328618,1328617,1259799,2912,2908,20580,437138,1238122,414924,1082,1822,22568,1079,6807,779,99,8921,5176,770,6795,5211,9005,6785,5221,5487,9634,768,783,1066,5215,1850,339,2637,774,8936,5185,1126,467,2782,2893,8946,20484,22812,5229,22842,16689,16857,16979,5570,24858,29166,18960}
+local CHECK = {8998,5209,5225,740,1328618,1328617,1259799,2912,2908,20580,437138,1238122,414924,1082,1822,22568,1079,6807,779,99,8921,5176,770,6795,5211,9005,6785,5221,5487,9634,768,783,1066,5215,1850,339,2637,774,8936,5185,1126,467,2782,2893,8946,20484,22812,5229,22842,16689,16857,16979,5570,24858,29166,18960}
 local function DumpSpells()
   local t, k = {}, {}
   pcall(function()
@@ -153,10 +159,49 @@ local function DumpSpells()
 end
 
 local ICON = "INV_MISC_QUESTIONMARK"
-local OLD = {"DM8 변신","표범공격","표범변신","곰공격","이동변신","MO회복","MO재생","MO뿌리","요정의불꽃","야생의징표","부활"}
+local OLD = {"DM8 변신","표범공격","표범변신","곰공격","이동변신","MO회복","MO재생","MO뿌리","요정의불꽃","야생의징표","부활",
+  "DM1 공격","DM2 출혈","DM3 마무리","DM4 요정불꽃","DM5 포효","DM6 회복","DM7 재생","DM8 생존","DM9 숨기질주","DM0 버프","DM- 해제","DM= 부활","DM 곰포효","DM 돌진발톱","DM 칼날할퀴기"} -- 5.8/5.10: 옛 이름은 지운다
 -- 1~12 기본바, 73~84 표범, 85~96 숨기, 97~108 곰, 109~120 달빛야수
 local FORM_BASES = {0, 72, 84, 96, 108}
-local KEYS = {"1","2","3","4","5","6","7","8","9","0","-","="}
+local KEYS = {"1","2","3","4","5","6","7","8","9","0","-","="} -- 칸 이름(도움말·이전 버전 호환)
+-- 5.7: 전투 키는 WASD 근처만. 칸 6~8·10~12는 T/G/C/Z/X/V. 칸 9는 키 없음(질주=표범 F, 숨기=휠클릭).
+local SLOT_BIND = {"1","2","3","4","5","T",false,"Z",false,false,"X","V"}
+-- 5.11: 칸 8 전투(별빛섬광/칼날/가르기)는 Z. 버프(칸 10)는 Ctrl+Z / Ctrl+Shift+Z. C는 비움(캐릭터 창).
+local FAR_KEYS = {"6","7","8","9","0","-","="}
+local OLD_KEYS = {"G","C"} -- 5.7 G=재생, 5.8~5.10 C=칸8. 둘 다 비움
+local function BindSlotKeys()
+  local changed = false
+  local function act(k)
+    local a = GetBindingAction(k)
+    return a and a ~= "" and a
+  end
+  local function clear(k)
+    local a = act(k)
+    if a and (a:find("^ACTIONBUTTON") or a:find("^ACTIONPAGE") or a:find("ACTIONBAR") or a:find("^MACRO")) then SetBinding(k); changed = true end
+  end
+  for _, key in ipairs(FAR_KEYS) do clear(key); clear("SHIFT-"..key) end
+  for _, key in ipairs(OLD_KEYS) do clear(key); clear("SHIFT-"..key) end
+  -- 예전 버프 키 Z·Shift+Z(칸 10)는 이제 칸 8 전투 키라, ACTIONBUTTON10이면 끊는다
+  for _, k in ipairs({"Z","SHIFT-Z"}) do
+    if act(k) == "ACTIONBUTTON10" then SetBinding(k); changed = true end
+  end
+  for i, key in ipairs(SLOT_BIND) do
+    if key then
+      local cmd = "ACTIONBUTTON"..i
+      if GetBindingAction(key) ~= cmd then SetBinding(key, cmd); changed = true end
+      if GetBindingAction("SHIFT-"..key) ~= cmd then SetBinding("SHIFT-"..key, cmd); changed = true end
+    end
+  end
+  -- Ctrl+T = 치유의 손길(DM 치유 매크로의 [mod:ctrl])
+  if GetBindingAction("CTRL-T") ~= "ACTIONBUTTON6" then SetBinding("CTRL-T", "ACTIONBUTTON6"); changed = true end
+  -- Ctrl+Z = 야생의 징표, Ctrl+Shift+Z = 가시 (칸 10)
+  if GetBindingAction("CTRL-Z") ~= "ACTIONBUTTON10" then SetBinding("CTRL-Z", "ACTIONBUTTON10"); changed = true end
+  if GetBindingAction("CTRL-SHIFT-Z") ~= "ACTIONBUTTON10" then SetBinding("CTRL-SHIFT-Z", "ACTIONBUTTON10"); changed = true end
+  -- 5.10까지 칸 8이던 C는 기본 캐릭터 창으로 되돌린다
+  local ca = GetBindingAction("C")
+  if ca == "" or ca == "ACTIONBUTTON8" then SetBinding("C", "TOGGLECHARACTER0"); changed = true end
+  return changed
+end
 
 local function IsDruid() local _, c = UnitClass("player"); return c == "DRUID" end
 
@@ -200,33 +245,28 @@ local function ClearAll()
   end
 end
 
+-- 5.8: 모든 폼 바에 같은 칸으로 놓는 매크로(칸 번호 → 이름). 1~5·8은 폼마다 달라서 아래 SPELLBARS가 맡는다.
+local COMMON = {[6]="DM 치유", [10]="DM 버프", [11]="DM 해제", [12]="DM 부활"}
 local function PlaceAll()
-  local list = BuildList()
-  for i, m in ipairs(list) do
-    local idx = i <= 12 and GetMacroIndexByName(m[1])
+  for slot, name in pairs(COMMON) do
+    local idx = GetMacroIndexByName(name)
     if idx and idx > 0 then
       for _, base in ipairs(FORM_BASES) do
-        PickupMacro(idx); PlaceAction(base + i); ClearCursor()
+        PickupMacro(idx); PlaceAction(base + slot); ClearCursor()
       end
     end
   end
-  -- 숫자키가 비어 있으면 기본 단축바에 연결
-  local changed = false
-  for i, key in ipairs(KEYS) do
-    local cmd = "ACTIONBUTTON"..i
-    local cur = GetBindingAction(key)
-    if not GetBindingKey(cmd) and (cur == nil or cur == "") then SetBinding(key, cmd); changed = true end
-  end
-  if changed then SaveB() end
+  -- 1~5와 T/C/Z/X/V만 단축바에 연결(6~0, -, = 와 G는 전투 키에서 제외)
+  if BindSlotKeys() then SaveB() end
 end
 
 -- 꾹 누르기(연속 시전)는 매크로에선 안 되므로, 연타 스킬은 폼별 단축바에 주문을 직접 올린다.
 -- {단축바 시작, {칸번호 = 주문ID}}
 local SPELLBARS = {
-  {0,   {[1]="DM 섬광곰", [2]=5176, [3]=339,   [4]=770,   [5]=2637, [8]={2912,"DM8 생존"}}},  -- 사람: 섬광곰 천벌 뿌리 요정불꽃 겨울잠 / 5.0: 8 별빛섬광(20렙, 원거리 첫 타)
-  {72,  {[1]=1082, [2]=1822, [3]="DM 표범마무리", [4]={16857,770}, [5]="DM 돌진발톱", [8]=5221}},    -- 표범: 할퀴기 갈퀴 마무리(이빨, Shift 도려내기) 요정불꽃(야성) 도려내기 / 8 칼날발톱
-  {84,  {[1]={9005,5221,1082}, [2]={6785,1822,1082}, [3]={5221,1082}, [4]={16857,770}, [5]="DM 돌진발톱", [8]=5221}},    -- 숨기: 암습 찢어발기기 칼날발톱 (못 배웠으면 할퀴기·갈퀴로 대신)
-  {96,  {[1]="DM3 마무리", [2]=6807, [3]=779,  [4]={16857,770}, [5]=6795, [8]={1328617,"DM8 생존"}}}, -- 곰: 1위협의포효(매크로) 2후려치기 3휘둘러치기 4요정불꽃 5포효 / 5.0: 8 가르기(25렙 특성, 안 찍었으면 원래 매크로)
+  {0,   {[1]="DM 섬광곰", [2]=5176, [3]=339,   [4]=770,   [5]=2637, [8]=2912}},  -- 사람: 섬광곰 천벌 뿌리 요정불꽃 겨울잠 / 8 별빛섬광(20렙)
+  {72,  {[1]=1082, [2]=1822, [3]="DM 표범마무리", [4]={16857,770}, [5]="DM 돌진", [8]=5221}},    -- 5.10: 1할퀴기(꾹 연타) 2갈퀴 3이빨(Shift 도려내기) 4요정불꽃 5돌진→칼날 8칼날(Z). 칼날→할퀴기 매크로는 포에버에서 할퀴기가 안 나가 제거
+  {84,  {[1]={9005,6785,5221,1082}, [2]={{9005,6785},1822,1082}, [3]={5221,1082}, [4]={16857,770}, [5]="DM 돌진", [8]=1822}},    -- 숨기: 1 암습(36렙)·없으면 찢어발기기(32렙) 2 찢어발기기(암습 배운 뒤)·그 전엔 갈퀴 3 칼날발톱 8 갈퀴
+  {96,  {[1]=6807, [2]=779, [3]=99, [4]={16857,770}, [5]={{{1238122,16979},"DM 돌진"},6795}, [8]=1328617}}, -- 곰: 1후려치기 2휘둘러치기 3위협의 포효 4요정불꽃 5포효(특성 찍으면 Shift 야성의 돌진) 8가르기(특성)
   {108, {[1]=5176, [2]=8921, [3]=339,   [4]=770,   [5]=2637}},              -- 달빛야수
 }
 local function BookSlot(name)
@@ -245,7 +285,14 @@ end
 local function PlaceSpell(slot, id)
   if type(id) == "table" then -- 앞에서부터 배운 첫 주문
     local pick = id[#id]
-    for _, x in ipairs(id) do if type(x) == "string" or Known(x) then pick = x; break end end
+    for _, x in ipairs(id) do
+      if type(x) == "table" then -- 5.6: {조건 주문(들), 놓을 것} = 조건 주문을 배웠을 때만
+        local req, ok = x[1], false
+        for _, r in ipairs(type(req) == "table" and req or {req}) do if Known(r) then ok = true end end
+        if ok and (type(x[2]) == "string" or Known(x[2])) then pick = x[2]; break end
+      elseif type(x) == "string" or Known(x) then pick = x; break end
+    end
+    if type(pick) == "table" then pick = pick[#pick] end
     id = pick
   end
   if type(id) == "string" then -- 매크로로 둘 칸(자동 공격 필요)
@@ -292,21 +339,15 @@ local function Restore()
   P("원래 단축바 배치로 되돌렸어요.")
 end
 
-local BINDV = 5
+local BINDV = 10 -- 5.11: Q 항상 표범, Shift+Q 수영=바다표범/아니면 여행, Z=전투, Ctrl+Z 버프
 local function BindKeys(force)
   -- 4.3: 지도는 ` 키(사용자 요청). M도 그대로 둔다
   if GetBindingAction("`") ~= "TOGGLEWORLDMAP" then
     SetBinding("`", "TOGGLEWORLDMAP")
     SaveB()
   end
-  -- 5.0: Shift+숫자는 와우 기본이 '단축바 페이지 넘기기'라서 Shift+3(도려내기) 등을 누르면 바가 3페이지로 넘어가 폼 바가 안 바뀌었다.
-  -- Shift+숫자를 같은 칸 버튼에 묶어 매크로의 [mod:shift]가 나가게 하고, 페이지가 넘어가 있으면 1페이지로 되돌린다
-  local sc = false
-  for i, key in ipairs(KEYS) do
-    local cmd = "ACTIONBUTTON"..i
-    if GetBindingAction("SHIFT-"..key) ~= cmd then SetBinding("SHIFT-"..key, cmd); sc = true end
-  end
-  if sc then SaveB() end
+  -- 5.0/5.7: Shift+키는 와우 기본이 단축바 페이지 넘기기인 경우가 있어, 같은 칸 버튼에 묶는다. 6~0, -, = 는 끊고 T/G/C/Z/X/V로 옮긴다.
+  if BindSlotKeys() then SaveB() end
   if GetActionBarPage and ChangeActionBarPage and GetActionBarPage() ~= 1 then ChangeActionBarPage(1) end
   if DruidMacrosDB.bindv == BINDV and not force then return end
   for _, m in ipairs(BuildList()) do
@@ -318,8 +359,10 @@ local function BindKeys(force)
   if first then
     PlaceAll(); PlaceSpells()
     P("레벨에 맞춘 배치로 바꿨어요. 아직 안 배운 스킬은 배우면 자동으로 켜져요.")
-    P("1~5는 꾹 누르면 연타돼요. 1공격 2출혈 3마무리 4요정불꽃 5도발/도려내기 6회복 7재생 8나무껍질(Shift 정신자극) 9숨기/질주 0버프 -해제 =부활")
-    P("휠 클릭 숨기(사람이면 표범 변신 후 한 번 더) Q 변신(물속 바다표범·밖 치타·그외 표범, Shift 표범) E곰 R 곰 강타·표범 엘룬의 빛·사람 자연의 손아귀(Shift+R 반대) F분노(Shift 광포한재생력)/질주/나무껍질 F1변신해제")
+    P("전투 키는 WASD 근처에 있어요. 1~5는 꾹 누르면 연타돼요.")
+    P("표범 1할퀴기 2갈퀴 3이빨(Shift 도려내기) 4요정불꽃 5돌진→칼날 Z칼날발톱  /  곰 1후려치기 2휘둘러치기 3위협의 포효 5포효(Shift 돌진) Z가르기")
+    P("Q 항상 표범(이미 변신 중이면 풀고 다시)  Shift+Q 수영 중 바다표범, 아니면 치타  E 곰  R 곰 강타·표범 엘룬의 빛·사람 자연의 손아귀(Shift+R 반대)  F 분노·질주·나무껍질(Shift 광포한 재생력·정신 자극)  F1 변신해제  휠 클릭 숨기")
+    P("T 회복(Shift 재생, Ctrl 치유의 손길)  Z 사람 별빛섬광·표범 칼날발톱·곰 가르기  Ctrl+Z 야생의 징표  Ctrl+Shift+Z 가시  X 저주 해제(Shift 독 해제)  V 환생·되살리기")
   end
 end
 
