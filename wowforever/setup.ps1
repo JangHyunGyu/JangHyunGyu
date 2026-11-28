@@ -92,6 +92,7 @@ $zipList += Get-Curse 261459 'FasterLoot'
 $zipList += Get-Curse 1710286 'LayerSwap'
 $zipList += Get-Curse 1716822 'ForeverLayerHop'
 $zipList += Get-Curse 1724751 'ForeverVisibility'
+$zipList += Get-GitHub 'zakarulcodes/ClearHorizons' 'ClearHorizons-*.zip'
 
 # ---- 3. extract and copy (never QuestieTrace, retail GatherMate2 storage, movement speed addons) ----
 $skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*|DruidResources|DenoNameplate|TheForeverEra|Baganator|Syndicator|Polestar_(deDE|esES|esMX|frFR|ptBR|ruRU|zhCN|zhTW))$'
@@ -161,6 +162,24 @@ foreach ($file in (Get-ChildItem (Join-Path $ao 'ForeverLayerHop') -Filter *.lua
   if ($added -gt 0) { [IO.File]::WriteAllLines($file.FullName, $res, $utf8); Say ('ForeverLayerHop patched: ' + $file.Name + ' x' + $added) }
 }
 
+# ---- 6b. ForeverVisibility: leave weatherDensity to ClearHorizons ----
+$fvStore = Join-Path $ao 'ForeverVisibility\Store.lua'
+if (Test-Path $fvStore) {
+  $txt = [IO.File]::ReadAllText($fvStore, $utf8)
+  if ($txt -notmatch 'ClearHorizons owns weatherDensity') {
+    $nl = $lf; if ($txt.Contains($cr + $lf)) { $nl = $cr + $lf }
+    $anchor = 'function ns.IsManaged(entry)' + $nl + '    local flag = ns.db and ns.db.manage[entry.key]'
+    $ins = 'function ns.IsManaged(entry)' + $nl + '    -- 2026-11-28: ClearHorizons owns weatherDensity and RAIDweatherDensity' + $nl + '    if entry and entry.key == "weatherDensity" then return false end' + $nl + '    local flag = ns.db and ns.db.manage[entry.key]'
+    if ($txt.Contains($anchor)) {
+      $bak = Join-Path $stage 'backup_ForeverVisibility'
+      New-Item -ItemType Directory -Force $bak | Out-Null
+      Copy-Item $fvStore $bak -Force
+      [IO.File]::WriteAllText($fvStore, $txt.Replace($anchor, $ins), $utf8)
+      Say 'ForeverVisibility weatherDensity left to ClearHorizons (Store.lua backup in staging)'
+    } else { Say 'WARNING: ForeverVisibility IsManaged anchor not found; weather overlap may remain' }
+  } else { Say 'ForeverVisibility weatherDensity already left to ClearHorizons' }
+} else { Say 'WARNING: ForeverVisibility Store.lua not found, weather patch skipped' }
+
 # ---- 7. DruidMacros (this repo: macros + keybinds; never an older pinned zip) ----
 $dm = Join-Path $ao 'DruidMacros'
 New-Item -ItemType Directory -Force $dm | Out-Null
@@ -223,7 +242,7 @@ if (Test-Path $al) {
 
 # ---- 9. SavedVariables (only with the game closed, only once the files exist) ----
 if ($running) {
-  Say 'The game is running: SavedVariables were not touched. Close the game and run this again for the GodJohnson arrow setting.'
+  Say 'The game is running: SavedVariables were not touched. Close the game and run this again for the GodJohnson arrow setting and ForeverVisibility weatherDensity unmanage.'
 } else {
   $svs = @(Get-ChildItem (Join-Path $wow 'WTF\Account') -Recurse -Filter 'GodJohnsonGoldBorder.lua' -ErrorAction SilentlyContinue | Where-Object { $_.DirectoryName -like '*SavedVariables' })
   if ($svs.Count -eq 0) { Say 'GodJohnson settings file does not exist yet. Log in once, close the game, then run this again.' }
@@ -241,6 +260,25 @@ if ($running) {
       Say 'GodJohnson 3D arrow already off'
     } else {
       Say 'GodJohnson arrow keys not found in the settings file: turn the 3D arrow off in the GodJohnson options instead'
+    }
+  }
+  $fvs = @(Get-ChildItem (Join-Path $wow 'WTF\Account') -Recurse -Filter 'ForeverVisibility.lua' -ErrorAction SilentlyContinue | Where-Object { $_.DirectoryName -like '*SavedVariables' })
+  if ($fvs.Count -eq 0) { Say 'ForeverVisibility settings file does not exist yet. Log in once, close the game, then run this again to unmanage weatherDensity.' }
+  foreach ($sv in $fvs) {
+    $old = [IO.File]::ReadAllText($sv.FullName, $utf8)
+    if ($old -match '\["manage"\][\s\S]{0,400}?\["weatherDensity"\]\s*=\s*false') {
+      Say 'ForeverVisibility weatherDensity already unmanaged in SavedVariables'
+      continue
+    }
+    $new = [regex]::Replace($old, '(\["manage"\]\s*=\s*\{)', ('$1' + $lf + '["weatherDensity"] = false,'))
+    if ($new -ne $old) {
+      $svb = Join-Path $stage 'sv_backup'
+      New-Item -ItemType Directory -Force $svb | Out-Null
+      Copy-Item $sv.FullName -Destination $svb -Force
+      [IO.File]::WriteAllText($sv.FullName, $new, $utf8)
+      Say 'ForeverVisibility weatherDensity unmanaged in SavedVariables (backup in staging\sv_backup)'
+    } else {
+      Say 'WARNING: could not add weatherDensity=false to ForeverVisibility manage table'
     }
   }
 }

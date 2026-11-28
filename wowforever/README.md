@@ -6,8 +6,9 @@
 irm https://raw.githubusercontent.com/JangHyunGyu/JangHyunGyu/main/wowforever/setup.ps1 | iex
 ```
 
-- 게임 폴더 `_forever_`를 찾고, 작업내역서의 애드온을 **그날 최신**으로 설치합니다.
+- 게임 폴더 `_forever_`를 찾고, 작업내역서의 애드온을 **그날 최신**으로 설치합니다. ClearHorizons(안개·날씨, `/ch`, `/ch weather 0`)도 포함됩니다.
 - `DruidMacros`는 이 저장소 파일만 씁니다(현재 **5.12**). 매크로와 키 바인딩은 로그인 때 애드온이 적용합니다. 게임이 켜져 있으면 SavedVariables는 건드리지 않습니다.
+- ForeverVisibility의 Weather(weatherDensity)는 ClearHorizons와 겹치므로, 설치 때 Store.lua를 패치해 그 항목을 관리하지 않게 합니다. 게임을 끈 뒤 스크립트를 다시 실행하면 SavedVariables에도 반영합니다.
 - 설치 금지: MovementSpeed / WidgetTools, ElvUI / Bartender4 / Dominos, Combo Points Forever / ForeverComboBar, QuestieTrace, DruidResources / Deno Nameplate / The Forever Era, 가방 UI 애드온(Baganator, Syndicator, Bagnon, AdiBags 등). 가방 애드온은 갓존슨의 퀘스트 아이템 표시를 가립니다.
 
 자세한 키 표·버전 이력은 `작업내역서_와우포에버_애드온.md` 4-7절(5.11 키 배치)을 보세요.
