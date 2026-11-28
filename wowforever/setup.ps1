@@ -7,9 +7,10 @@
 # DruidMacros (BINDV) after login; this script does not edit bindings-cache or WTF while
 # the game is running. Run it again after the game has been started and closed once to
 # apply the SavedVariables settings (GodJohnson arrow).
-# 2026-11-28 set also includes DruidResources, Baganator+Syndicator, DenoNameplate, TheForeverEra.
-# Do not install MovementSpeed/WidgetTools, ElvUI/Bartender4/Dominos (bar conflict), or
-# ComboPointsForever/ForeverComboBar (duplicates DruidResources).
+# 2026-11-28 later: Baganator+Syndicator stay. Do not install DruidResources,
+# DenoNameplate, or TheForeverEra (UI overlapped GodJohnson: resource bar, nameplates,
+# and the level guide window). Also do not install MovementSpeed/WidgetTools,
+# ElvUI/Bartender4/Dominos (bar conflict), or ComboPointsForever/ForeverComboBar.
 & {
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -88,14 +89,11 @@ $zipList += Get-Curse 261459 'FasterLoot'
 $zipList += Get-Curse 1710286 'LayerSwap'
 $zipList += Get-Curse 1716822 'ForeverLayerHop'
 $zipList += Get-Curse 1724751 'ForeverVisibility'
-$zipList += Get-Curse 1720699 'DruidResources'
 $zipList += Get-Curse 914482 'Baganator'
 $zipList += Get-Curse 988370 'Syndicator'
-$zipList += Get-Curse 1728681 'DenoNameplate'
-$zipList += Get-Curse 1806843 'TheForeverEra'
 
 # ---- 3. extract and copy (never QuestieTrace, retail GatherMate2 storage, movement speed addons) ----
-$skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*|Polestar_(deDE|esES|esMX|frFR|ptBR|ruRU|zhCN|zhTW))$'
+$skip = '^(QuestieTrace|GatherMate2Storage_.*|MovementSpeed|WidgetTools|WidgetToolbox.*|DruidResources|DenoNameplate|TheForeverEra|Polestar_(deDE|esES|esMX|frFR|ptBR|ruRU|zhCN|zhTW))$'
 if (-not $useTugs) { $skip = $skip.Replace('^(', '^(Guidelime|GuideLime_TUGs_Forever|') }
 foreach ($zip in $zipList) {
   $dir = Join-Path $ext ([IO.Path]::GetFileNameWithoutExtension($zip))
