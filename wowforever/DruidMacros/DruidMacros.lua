@@ -1,4 +1,4 @@
--- DruidMacros 5.11: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
+-- DruidMacros 5.12: 드루이드 한글 매크로 자동 생성 + 단축바 자동 배치
 local TAG = "|cffff7d0a[드루이드 매크로]|r "
 local function P(msg) print(TAG .. msg) end
 
@@ -102,11 +102,12 @@ local function BuildList()
     {"DM 해제", T..CAST{{MOS,poison},{MO,curse}}},                          -- X: 저주 해제, Shift 독 해제
     {"DM 부활", T.."/cast [combat,@mouseover,help,dead][combat] "..(rebirth or "환생").."; [@mouseover,help,dead][] 되살리기"}, -- V
     -- E: 곰. 이미 곰이면 풀고 바로 다시 곰(이동 불가·감속 풀기)
-    {"DME 곰", T..(bear and "/cancelform [form:1,nomod:shift]\n" or "")..CAST{{"[mod:shift,form:1] ",nil,true},{"",BANG(bear)}}, {"E","SHIFT-E"}},
+    {"DME 곰", T..(bear and "/cancelform [form:1,nomod:shift]\n" or "")..CAST{{"[mod:shift,form:1] ",nil,true},{"",BANG(bear)}}.."\n/click [nomod] DruidMacrosBarBear", {"E","SHIFT-E"}},
     -- 5.11 Q: 항상 표범(물속도 표범). 이미 표범·바다표범·치타면 풀고 바로 다시 표범. Shift+Q = 수영 중 바다표범, 아니면 치타(여행)
     {"DMQ 표범", T..(cat and ("/cancelform [form:3"..(aquatic and ("/"..FA) or "")..(FT and ("/"..FT) or "")..",nomod:shift]\n") or "")
       ..(((aquatic or travel) and ("/cancelform [form:"..((aquatic and travel and (FA.."/"..FT)) or FA or FT)..",mod:shift]\n") or ""))
-      ..CAST{{"[mod:shift,swimming] ",BANG(aquatic)},{"[mod:shift] ",BANG(travel),not travel},{"",BANG(cat)}}, {"Q","SHIFT-Q"}},
+      ..CAST{{"[mod:shift,swimming] ",BANG(aquatic)},{"[mod:shift] ",BANG(travel),not travel},{"",BANG(cat)}}
+      .."\n/click [mod:shift] DruidMacrosBarOff; [nomod] DruidMacrosBarCat", {"Q","SHIFT-Q"}},
     {"DMR 강타", "#showtooltip\n/startattack [form:1]\n"..CAST{{"[mod:shift,form:1/3] ",grasp},{"[form:1] ",bash},{"[form:3] ",elune},{"[mod:shift] ",elune},{"",grasp}}, {"R","SHIFT-R"}}, -- R 곰 강타/표범 엘룬의 빛/사람 자연의 손아귀, Shift+R 반대
     {"DMF 생존기", T..CAST{{"[form:1,mod:shift] ",frenzy},{"[mod:shift] ",innerv},{"[form:1] ",enrage},{"[form:3] ",dash},{"",bark}}, {"F","SHIFT-F"}}, -- F 곰 분노/표범 질주/사람 나무껍질, Shift+F 곰 광포한 재생력/그 외 정신 자극
     {"DM 변신해제", T.."/cancelform", {"F1"}},
@@ -491,29 +492,32 @@ local function PlaceExtras()
   if wi <= #want then P("빈 칸이 모자라 "..(#want - wi + 1).."개를 못 넣었어요.") end
 end
 
--- 5.4: Q·E로 폼을 풀고 같은 순간 다시 변신하면 포에버 클라이언트가 보너스 바 값을 0으로 남긴다
--- (몸은 표범/곰인데 GetBonusBarOffset()=0 → 기본 바가 1페이지(사람)에 멈춤). 게임 안에서 직접 재현·확인함.
--- 보너스 바가 정상이면(b) 아무것도 안 한다. 폼은 있는데 보너스 바가 없을 때만 표범 7·은신 8·곰 9로 바꾸고,
--- 그 뒤 사람으로 돌아오면(n) 원래 페이지로 되돌린다. 상태 이름은 숫자를 쓰면 안 된다(숫자로 넘어와 페이지 0 오류, 5.3 실패 원인).
+-- 5.4/5.12 바 수정: Q·E로 폼을 풀고 바로 다시 변신하면(이동 불가·감속 풀기) 포에버가
+-- 보너스 바 값을 0으로 남기거나, 같은 상태로 봐서 드라이버가 다시 안 돈다.
+-- 5.4는 [bonusbar]가 먼저 맞으면(b) 아무것도 안 했다. CC 중 재변신 뒤에는 [bonusbar]가
+-- 한동안 참이거나 이미 b인 채로 클라이언트만 1페이지로 돌아가, _onstate가 안 불린다.
+-- UPDATE_* 이벤트에서 actionpage를 바꾸면 전투 중에는 보호 제약이 걸린다.
+-- 5.12: (1) 폼·보너스바를 서로 다른 상태 이름으로 나눠 1→0 전환에도 다시 맞춘다.
+-- (2) Q/E 매크로 끝의 /click이 보안 핸들러에서 페이지를 다시 넣고, 잠시 폼이
+-- 없다고 나와도(holding) 표범 7·은신 8·곰 9를 유지한다. F1 변신해제는 holding이 없다.
+-- 상태 이름은 숫자를 쓰면 안 된다(5.3 실패 원인).
 local fixHdr, fixCond
 local FIX_STATE = [[
 local m = self:GetFrameRef("mab")
 if not m then return end
-if newstate == "b" then self:SetAttribute("dmon", nil) return end
-if newstate == "n" then
-  if self:GetAttribute("dmon") then
-    self:SetAttribute("dmon", nil)
-    local p = GetActionBarPage()
-    if not p or p < 1 or p > 6 then p = 1 end
-    m:SetAttribute("actionpage", p)
-    self:RunAttribute("dmref")
-  end
-  return
+local p
+if newstate == "s" then p = 8
+elseif newstate == "cb" or newstate == "cf" then p = 7
+elseif newstate == "rb" or newstate == "rf" then p = 9
+elseif newstate == "kb" or newstate == "kf" then p = 10
+elseif newstate == "n" then
+  if self:GetAttribute("holding") then p = self:GetAttribute("lastpage") or 1 else p = 1 end
+else return end
+if p and p > 1 then
+  self:SetAttribute("lastpage", p)
+  if newstate ~= "n" then self:SetAttribute("holding", nil) end
 end
-local pg = (newstate == "s" and 8) or (newstate == "c" and 7) or (newstate == "r" and 9)
-if not pg then return end
-m:SetAttribute("actionpage", pg)
-self:SetAttribute("dmon", 1)
+m:SetAttribute("actionpage", p)
 self:RunAttribute("dmref")
 ]]
 local FIX_REF = [[
@@ -524,6 +528,33 @@ for i = 1, 12 do
   if b then b:SetAttribute("dmfix", n) end
 end
 ]]
+local HOLD_CLICK = [[
+local m = self:GetFrameRef("mab")
+local hdr = self:GetFrameRef("hdr")
+local p = self:GetAttribute("holdpage")
+if m and p then m:SetAttribute("actionpage", p) end
+if hdr then
+  if self:GetAttribute("dohold") and p and p > 1 then
+    hdr:SetAttribute("holding", 1)
+    hdr:SetAttribute("lastpage", p)
+  else
+    hdr:SetAttribute("holding", nil)
+  end
+  hdr:RunAttribute("dmref")
+end
+]]
+local function MakeBarClick(name, page, hold)
+  local ok, b = pcall(CreateFrame, "Button", name, UIParent, "SecureHandlerClickTemplate")
+  if not ok or not b then return end
+  pcall(function() b:RegisterForClicks("AnyUp", "AnyDown") end)
+  b:SetAttribute("holdpage", page)
+  if hold then b:SetAttribute("dohold", 1) end
+  b:SetFrameRef("mab", MainActionBar)
+  b:SetFrameRef("hdr", fixHdr)
+  b:SetAttribute("_onclick", HOLD_CLICK)
+  pcall(function() b:Hide() end)
+  return b
+end
 local function FixBar()
   if not MainActionBar or not RegisterStateDriver or InCombatLockdown() then return end
   if not fixHdr then
@@ -534,10 +565,17 @@ local function FixBar()
     for i = 1, 12 do local b = _G["ActionButton"..i]; if b then h:SetFrameRef("b"..i, b) end end
     h:SetAttribute("dmref", FIX_REF)
     h:SetAttribute("_onstate-dmfix", FIX_STATE)
+    MakeBarClick("DruidMacrosBarCat", 7, true)
+    MakeBarClick("DruidMacrosBarBear", 9, true)
+    MakeBarClick("DruidMacrosBarOff", 1, false)
   end
   local FB = FormIndex({5487, 9634}, "1")
   local FC = FormIndex({768}, "3")
-  local cond = "[bonusbar]b;[form:"..FC..",stealth]s;[form:"..FC.."]c;[form:"..FB.."]r;n"
+  -- bonusbar:N 과 form:FC 를 다른 이름(cb/cf)으로 둬야, 보너스만 0으로 떨어져도 핸들러가 다시 돈다
+  local cond = "[form:"..FC..",stealth]s;[bonusbar:2]s;[bonusbar:1]cb;[form:"..FC.."]cf;[bonusbar:3]rb;[form:"..FB.."]rf"
+  local FK = FormIndex({24858}, nil)
+  if FK then cond = cond..";[bonusbar:4]kb;[form:"..FK.."]kf" end
+  cond = cond..";n"
   if fixCond == cond then return end
   if pcall(RegisterStateDriver, fixHdr, "dmfix", cond) then fixCond = cond end
 end

@@ -169,9 +169,9 @@ $ver = (Select-String -Path (Join-Path $dm 'DruidMacros.toc') -Pattern '^## Vers
 $luaMd5 = (Get-FileHash (Join-Path $dm 'DruidMacros.lua') -Algorithm MD5).Hash.ToLower()
 $tocMd5 = (Get-FileHash (Join-Path $dm 'DruidMacros.toc') -Algorithm MD5).Hash.ToLower()
 Say ('DruidMacros ' + $ver + '  lua=' + $luaMd5 + '  toc=' + $tocMd5)
-$need = [version]'5.11'
+$need = [version]'5.12'
 $got = $null; [void][version]::TryParse($ver, [ref]$got)
-if (-not $got -or $got -lt $need) { throw ('DruidMacros in this repo is ' + $ver + ', need 5.11 or newer') }
+if (-not $got -or $got -lt $need) { throw ('DruidMacros in this repo is ' + $ver + ', need 5.12 or newer') }
 
 # ---- 8. TUGs solo guides: drop dungeon / instance quests everywhere, elite quests in guides from level 20,
 #         quests that need a removed quest first, and the dungeon-only instruction lines ----

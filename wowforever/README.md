@@ -7,12 +7,12 @@ irm https://raw.githubusercontent.com/JangHyunGyu/JangHyunGyu/main/wowforever/se
 ```
 
 - 게임 폴더 `_forever_`를 찾고, 작업내역서의 애드온을 **그날 최신**으로 설치합니다.
-- `DruidMacros`는 이 저장소 파일만 씁니다(현재 **5.11**). 매크로와 키 바인딩은 로그인 때 애드온이 적용합니다. 게임이 켜져 있으면 SavedVariables는 건드리지 않습니다.
+- `DruidMacros`는 이 저장소 파일만 씁니다(현재 **5.12**). 매크로와 키 바인딩은 로그인 때 애드온이 적용합니다. 게임이 켜져 있으면 SavedVariables는 건드리지 않습니다.
 - 설치 금지: MovementSpeed / WidgetTools, ElvUI / Bartender4 / Dominos, Combo Points Forever / ForeverComboBar, QuestieTrace, DruidResources / Deno Nameplate / The Forever Era, 가방 UI 애드온(Baganator, Syndicator, Bagnon, AdiBags 등). 가방 애드온은 갓존슨의 퀘스트 아이템 표시를 가립니다.
 
 자세한 키 표·버전 이력은 `작업내역서_와우포에버_애드온.md` 4-7절(5.11 키 배치)을 보세요.
 
-## DruidMacros 5.11 키 (요약)
+## DruidMacros 5.12 키 (요약, 5.11과 같음)
 
 | 키 | 동작 |
 |---|---|
@@ -26,4 +26,4 @@ irm https://raw.githubusercontent.com/JangHyunGyu/JangHyunGyu/main/wowforever/se
 | E R F F1 휠클릭 X V | 곰 / 강타·엘룬·손아귀 / 생존기 / 변신해제 / 숨기 / 해제 / 부활 |
 | C | 캐릭터 창 |
 
-lua MD5 `3d7c61ef96b77d68d5a19e7243ccf7be` / toc MD5 `c62593dfc25227247e30f127d4e7d2f1`
+lua MD5 `1e939d395e2544a1479fc34c27b7c98c` / toc MD5 `7d3c449271de569d58af48ab927265a4`
